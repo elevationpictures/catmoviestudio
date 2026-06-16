@@ -245,17 +245,7 @@
     font-weight: 500;
   }
 
-  /* scanline flicker on h1 */
-  h1::after {
-    content: '';
-    display: block;
-    height: 1px;
-    background: rgba(245,166,35,0.08);
-    margin-top: 4px;
-    animation: scanline 4s linear infinite;
-  }
-  @keyframes scanline {
-    0%   { opacity: 0; transform: translateY(-40px); }
+
     50%  { opacity: 1; }
     100% { opacity: 0; transform: translateY(40px); }
   }
