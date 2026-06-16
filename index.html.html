@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cat Movie Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #0D0F1A;
+    --amber:  #F5A623;
+    --cream:  #F0EAD6;
+    --rose:   #C4847A;
+    --teal:   #3D8A8F;
+    --dim:    #6B6F85;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── Film grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    background-size: 180px;
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 10;
+    animation: grain 0.4s steps(1) infinite;
+  }
+
+  @keyframes grain {
+    0%  { background-position: 0 0; }
+    25% { background-position: -30px 20px; }
+    50% { background-position: 10px -15px; }
+    75% { background-position: -20px -10px; }
+  }
+
+  /* ── Film sprocket holes top/bottom ── */
+  .sprockets {
+    position: fixed;
+    left: 0; right: 0;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px;
+    z-index: 5;
+    overflow: hidden;
+  }
+  .sprockets.top    { top: 0;    background: #070810; border-bottom: 1px solid #1a1d30; }
+  .sprockets.bottom { bottom: 0; background: #070810; border-top:    1px solid #1a1d30; }
+  .hole {
+    width: 16px; height: 12px;
+    border-radius: 2px;
+    background: var(--navy);
+    border: 1px solid #2a2d42;
+    flex-shrink: 0;
+  }
+
+  /* ── Countdown leader ── */
+  #countdown {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    z-index: 20;
+    animation: fadeLeader 0.15s ease forwards;
+    animation-delay: 3.2s;
+  }
+  @keyframes fadeLeader { to { opacity: 0; pointer-events: none; } }
+
+  .leader-frame {
+    position: relative;
+    width: 320px;
+    height: 320px;
+  }
+
+  /* big circle */
+  .leader-frame svg { width: 100%; height: 100%; }
+
+  .count-digit {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 96px;
+    color: #fff;
+    opacity: 0;
+  }
+  .count-digit.d3 { animation: blink 0.9s step-start forwards; animation-delay: 0.1s; }
+  .count-digit.d2 { animation: blink 0.9s step-start forwards; animation-delay: 1.0s; }
+  .count-digit.d1 { animation: blink 0.9s step-start forwards; animation-delay: 1.9s; }
+
+  @keyframes blink {
+    0%   { opacity: 1; }
+    85%  { opacity: 1; }
+    86%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  /* spinning crosshair ring */
+  .ring {
+    position: absolute;
+    inset: 0;
+    animation: spin 1s linear infinite;
+    transform-origin: center;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Main content ── */
+  #main {
+    position: fixed;
+    inset: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+    animation-delay: 3.6s;
+    z-index: 2;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 24px;
+  }
+
+  .paw {
+    font-size: 42px;
+    margin-bottom: 16px;
+    display: block;
+    animation: pawbounce 2.5s ease-in-out infinite;
+    animation-delay: 4s;
+  }
+  @keyframes pawbounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(18px, 3.5vw, 38px);
+    line-height: 1.4;
+    text-align: center;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+
+  h1 span {
+    color: var(--amber);
+  }
+
+  .tagline {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    margin-top: 14px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  /* WIP badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 10px 18px;
+    letter-spacing: 0.12em;
+    position: relative;
+    overflow: hidden;
+  }
+  .badge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--amber);
+    opacity: 0.06;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%       { opacity: 0.3; transform: scale(0.7); }
+  }
+
+  /* pixel film strip decorative divider */
+  .filmstrip {
+    display: flex;
+    gap: 4px;
+    margin: 36px 0 28px;
+    align-items: center;
+  }
+  .frame {
+    width: 28px; height: 20px;
+    border: 1px solid #2a2d42;
+    background: #13152a;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .frame::before, .frame::after {
+    content: '';
+    position: absolute;
+    width: 5px; height: 3px;
+    background: var(--navy);
+    border: 1px solid #2a2d42;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .frame::before { top: -4px; }
+  .frame::after  { bottom: -4px; }
+  .frame.lit { border-color: var(--amber); background: #1e1a0d; }
+  .frame.lit::before, .frame.lit::after { border-color: var(--amber); }
+
+  .credit {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .credit strong {
+    color: var(--rose);
+    font-weight: 500;
+  }
+
+  /* scanline flicker on h1 */
+  h1::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: rgba(245,166,35,0.08);
+    margin-top: 4px;
+    animation: scanline 4s linear infinite;
+  }
+  @keyframes scanline {
+    0%   { opacity: 0; transform: translateY(-40px); }
+    50%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(40px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sprocket holes -->
+<div class="sprockets top"  id="st"></div>
+<div class="sprockets bottom" id="sb"></div>
+
+<!-- Film countdown leader -->
+<div id="countdown">
+  <div class="leader-frame">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- outer dark ring -->
+      <circle cx="100" cy="100" r="98" fill="#000" stroke="#333" stroke-width="1"/>
+      <!-- mid circle -->
+      <circle cx="100" cy="100" r="72" fill="none" stroke="#555" stroke-width="1"/>
+      <!-- inner circle -->
+      <circle cx="100" cy="100" r="40" fill="none" stroke="#444" stroke-width="1"/>
+      <!-- crosshair lines -->
+      <g class="ring" style="transform-origin:100px 100px">
+        <line x1="100" y1="2"   x2="100" y2="28"  stroke="#888" stroke-width="1"/>
+        <line x1="100" y1="172" x2="100" y2="198" stroke="#888" stroke-width="1"/>
+        <line x1="2"   y1="100" x2="28"  y2="100" stroke="#888" stroke-width="1"/>
+        <line x1="172" y1="100" x2="198" y2="100" stroke="#888" stroke-width="1"/>
+        <!-- corner marks -->
+        <line x1="130" y1="30"  x2="140" y2="20"  stroke="#666" stroke-width="1"/>
+        <line x1="70"  y1="30"  x2="60"  y2="20"  stroke="#666" stroke-width="1"/>
+        <line x1="130" y1="170" x2="140" y2="180" stroke="#666" stroke-width="1"/>
+        <line x1="70"  y1="170" x2="60"  y2="180" stroke="#666" stroke-width="1"/>
+      </g>
+      <!-- amber accent arc -->
+      <circle cx="100" cy="100" r="84" fill="none" stroke="#F5A623" stroke-width="1.5" stroke-dasharray="40 490" stroke-dashoffset="0">
+        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="1s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+    <div class="count-digit d3">3</div>
+    <div class="count-digit d2">2</div>
+    <div class="count-digit d1">1</div>
+  </div>
+</div>
+
+<!-- Main content -->
+<div id="main">
+  <p class="eyebrow">Elevation Pictures Corp.</p>
+  <span class="paw">🐾</span>
+  <h1>CAT<span> MOVIE</span><br>STUDIO</h1>
+  <p class="tagline">An idle strategy game about cats who make films.</p>
+
+  <div class="badge">
+    <span class="badge-dot"></span>
+    Work in progress
+  </div>
+
+  <div class="filmstrip" id="strip"></div>
+
+  <p class="credit">A game by <strong>Elevation Pictures</strong></p>
+</div>
+
+<script>
+  // Fill sprocket holes
+  function fillSprockets(id) {
+    const el = document.getElementById(id);
+    const n = Math.ceil(window.innerWidth / 28) + 2;
+    el.innerHTML = Array(n).fill('<div class="hole"></div>').join('');
+  }
+  fillSprockets('st');
+  fillSprockets('sb');
+
+  // Film strip frames — light up the middle one
+  const strip = document.getElementById('strip');
+  const frames = 9;
+  for (let i = 0; i < frames; i++) {
+    const d = document.createElement('div');
+    d.className = 'frame' + (i === Math.floor(frames/2) ? ' lit' : '');
+    strip.appendChild(d);
+  }
+</script>
+</body>
+</html>
